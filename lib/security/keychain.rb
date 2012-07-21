@@ -9,19 +9,19 @@ module Security
     end
 
     def info
-      system %{security show-keychain-info "#{@filename}"}
+      system %{security show-keychain-info #{@filename.shellescape}}
     end
 
     def lock
-      system %{security lock-keychain "#{@filename}"}
+      system %{security lock-keychain #{@filename.shellescape}}
     end
 
     def unlock(password)
-      system %{security unlock-keychain -p #{password} "#{@filename}"}
+      system %{security unlock-keychain -p #{password.shellescape} #{@filename.shellescape}}
     end
 
     def delete
-      system %{security delete-keychain "#{@filename}"}
+      system %{security delete-keychain #{@filename.shellescape}}
     end
 
     class << self
@@ -32,7 +32,7 @@ module Security
       def list(domain = :user)
         raise ArgumentError "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
 
-        keychains_from_command('list-keychains', domain)
+        keychains_from_output(`security list-keychains -d #{domain}`)
       end
 
       def lock
@@ -40,21 +40,21 @@ module Security
       end
 
       def unlock(password)
-        system %{security unlock-keychain -p #{password}}
+        system %{security unlock-keychain -p #{password.shellescape}}
       end
 
       def default_keychain
-        keychains_from_command('default-keychain').first
+        keychains_from_output(`security default-keychain`).first
       end
 
       def login_keychain
-        keychains_from_command('login-keychain').first
+        keychains_from_output(`security login-keychain`).first
       end
 
       private
 
-      def keychains_from_command(command, *args)
-        `security #{[command, *args].compact.join(' ')}`.split(/\n/).collect{|line| new(line.strip.gsub(/^\"|\"$/, ""))}
+      def keychains_from_output(output)
+        output.split(/\n/).collect{|line| new(line.strip.gsub(/^\"|\"$/, ""))}
       end
     end    
   end

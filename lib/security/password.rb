@@ -40,7 +40,7 @@ module Security
         flags[:G] ||= options.delete(:value)
         flags[:j] ||= options.delete(:comment)
 
-        flags.delete_if{|k,v| v.nil?}.collect{|k, v| "-#{k} #{v}".strip}.join(" ")
+        flags.delete_if{|k,v| v.nil?}.collect{|k, v| "-#{k} #{v.shellescape}".strip}.join(" ")
       end
     end
   end
@@ -56,9 +56,7 @@ module Security
       end
 
       def find(options)
-        options[:g] = ''
-
-        password_from_output(`security 2>&1 find-generic-password #{flags_for_options(options)}`)
+        password_from_output(`security 2>&1 find-generic-password -g #{flags_for_options(options)}`)
       end
 
       def delete(options)
@@ -85,9 +83,7 @@ module Security
       end
 
       def find(options)
-        options[:g] = ''
-
-        password_from_output(`security 2>&1 find-internet-password #{flags_for_options(options)}`)
+        password_from_output(`security 2>&1 find-internet-password -g #{flags_for_options(options)}`)
       end
 
       def delete(options)
