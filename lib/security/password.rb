@@ -48,7 +48,7 @@ module Security
 
   class GenericPassword < Password
     class << self
-      def add(account, service, password, options = {})
+      def add(service, account, password, options = {})
         options[:a] = account
         options[:s] = service
         options[:w] = password
@@ -70,7 +70,7 @@ module Security
 
   class InternetPassword < Password
     class << self
-      def add(account, server, password, options = {})
+      def add(server, account, password, options = {})
         options[:a] = account
         options[:s] = server
         options[:w] = password
