@@ -39,7 +39,6 @@ module Security
         flags[:D] ||= options.delete(:kind)
         flags[:G] ||= options.delete(:value)
         flags[:j] ||= options.delete(:comment)
-        flags[:s] ||= options.delete(:service) || options.delete(:server)
 
         flags.delete_if{|k,v| v.nil?}.collect{|k, v| "-#{k} #{v}".strip}.join(" ")
       end
@@ -64,6 +63,13 @@ module Security
 
       def delete(options)
         system "security delete-generic-password #{flags_for_options(options)}"
+      end
+
+      private
+
+      def flags_for_options(options = {})
+        options[:s] ||= options.delete(:service)
+        super(options)
       end
     end
   end
@@ -91,6 +97,7 @@ module Security
       private
 
       def flags_for_options(options = {})
+        options[:s] ||= options.delete(:server)
         options[:p] ||= options.delete(:path)
         options[:P] ||= options.delete(:port)
         options[:r] ||= options.delete(:protocol)
