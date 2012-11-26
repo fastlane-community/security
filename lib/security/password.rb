@@ -33,12 +33,12 @@ module Security
 
       def flags_for_options(options = {})
         flags = options.dup
-        flags[:a] ||= options.delete(:account)
-        flags[:c] ||= options.delete(:creator)
-        flags[:C] ||= options.delete(:type)
-        flags[:D] ||= options.delete(:kind)
-        flags[:G] ||= options.delete(:value)
-        flags[:j] ||= options.delete(:comment)
+        flags[:a] ||= flags.delete(:account)
+        flags[:c] ||= flags.delete(:creator)
+        flags[:C] ||= flags.delete(:type)
+        flags[:D] ||= flags.delete(:kind)
+        flags[:G] ||= flags.delete(:value)
+        flags[:j] ||= flags.delete(:comment)
 
         flags.delete_if{|k,v| v.nil?}.collect{|k, v| "-#{k} #{v.shellescape}".strip}.join(" ")
       end
