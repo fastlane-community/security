@@ -1,3 +1,5 @@
+require 'shellwords'
+
 module Security
   class Keychain
     DOMAINS = [:user, :system, :common, :dynamic]
@@ -56,6 +58,6 @@ module Security
       def keychains_from_output(output)
         output.split(/\n/).collect{|line| new(line.strip.gsub(/^\"|\"$/, ""))}
       end
-    end    
+    end
   end
 end

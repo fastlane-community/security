@@ -1,3 +1,5 @@
+require 'shellwords'
+
 module Security
   class Password
     attr_reader :keychain, :attributes, :password
@@ -7,14 +9,14 @@ module Security
     def initialize(keychain, attributes, password)
       @keychain = Keychain.new(keychain)
       @attributes = attributes
-      @password = password 
+      @password = password
     end
 
     class << self
       private
 
       def password_from_output(output)
-        return nil if /^security\: / === output 
+        return nil if /^security\: / === output
 
         keychain, attributes, password = nil, {}, nil
         output.split(/\n/).each do |line|
@@ -78,7 +80,7 @@ module Security
         options[:a] = account
         options[:s] = server
         options[:w] = password
-        
+
         system "security add-internet-password #{flags_for_options(options)}"
       end
 
