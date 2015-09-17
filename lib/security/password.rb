@@ -25,8 +25,12 @@ module Security
             keychain = $1
           when /\"(\w{4})\".+\=\"(.+)\"/
             attributes[$1] = $2
+          when /\"(\w{4})\".+\=0x([[:xdigit:]]+)\s+\".+\"/
+            attributes[$1] = [$2].pack('H*')
           when /^password\: \"(.+)\"/
             password = $1
+          when /^password\: 0x([[:xdigit:]]+)\s+\".+\"/
+            password = [$1].pack('H*')
           end
         end
 
