@@ -11,14 +11,10 @@ Security::Keychain::default_keychain.filename #=> "/Users/johnnyappleseed/Librar
 Security::InternetPassword.find(server: "itunesconnect.apple.com").password #=> "p4ssw0rd"
 ```
 
-## Contact
-
-Mattt Thompson
-
-- http://github.com/mattt
-- http://twitter.com/mattt
-- m@mattt.me
-
 ## License
 
-Security is available under the MIT license. See the LICENSE file for more info.
+MIT
+
+## Contact
+
+Mattt ([@mattt](https://twitter.com/mattt))
