@@ -12,8 +12,7 @@ Gem::Specification.new do |s|
   s.summary     = "Security"
   s.description = "Library for interacting with the Mac OS X Keychain"
 
-  s.add_development_dependency "rspec", "~> 0.6.1"
-  s.add_development_dependency "rake",  "~> 0.9.2"
+  s.add_development_dependency 'rake', '~> 12.3', '>= 12.3.3'
 
   s.files         = Dir["./**/*"].reject { |file| file =~ /\.\/(bin|log|pkg|script|spec|test|vendor)/ }
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
