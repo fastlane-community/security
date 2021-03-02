@@ -4,13 +4,13 @@ require "security"
 
 Gem::Specification.new do |s|
   s.name        = "security"
-  s.authors     = ["Mattt Thompson"]
-  s.email       = "m@mattt.me"
-  s.homepage    = "http://mattt.me"
+  s.authors     = ["Mattt"]
+  s.email       = "mattt@me.com"
+  s.homepage    = "https://mat.tt/"
   s.version     = Security::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.summary     = "Security"
-  s.description = "Library for interacting with the Mac OS X Keychain"
+  s.license     = "MIT"
+  s.summary     = "Interact with the macOS Keychain"
 
   s.add_development_dependency 'rake', '~> 12.3', '>= 12.3.3'
 
