@@ -1,12 +1,15 @@
 # Security
-**Library for interacting with the Mac OS X Keychain**
 
-> This library currently only implements the necessary commands for password management for [Cupertino](https://github.com/mattt/cupertino). As such, some methods are stubbed out to raise `NotImplementedError`.
+**A library for interacting with the macOS Keychain**
+
+> This library implements only the commands necessary for password management in
+> [Cupertino](https://github.com/mattt/cupertino).
+> As such, some methods are stubbed out to raise `NotImplementedError`.
 
 ## Usage
 
 ```ruby
-Security::Keychain::default_keychain.filename #=> "/Users/johnnyappleseed/Library/Keychains/login.keychain"
+Security::Keychain::default_keychain.filename #=> "/Users/jappleseed/Library/Keychains/login.keychain"
 
 Security::InternetPassword.find(server: "itunesconnect.apple.com").password #=> "p4ssw0rd"
 ```
