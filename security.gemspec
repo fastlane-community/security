@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.name        = 'security'
   s.authors     = ['Mattt']
   s.email       = 'mattt@me.com'
-  s.homepage    = 'https://mat.tt/'
+  s.homepage    = 'https://github.com/fastlane-community/security'
   s.version     = Security::VERSION
   s.platform    = Gem::Platform::RUBY
   s.license     = 'MIT'
