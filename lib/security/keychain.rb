@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'shellwords'
 
 module Security
   class Keychain
-    DOMAINS = %i[user system common dynamic]
+    DOMAINS = %i[user system common dynamic].freeze
 
     attr_reader :filename
 
