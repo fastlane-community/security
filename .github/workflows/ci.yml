@@ -8,13 +8,19 @@ on:
 
 jobs:
   test:
-    runs-on: macos-latest
+    runs-on: "macos-${{ matrix.macos-version }}"
 
-    name: "Test (Ruby ${{ matrix.ruby-version }})"
+    name: "Test on macOS ${{ matrix.macos-version }} (Ruby ${{ matrix.ruby-version }})"
 
     strategy:
       matrix:
-        ruby-version: [2.7, 2.6, 2.5]
+        macos-version:
+          - "10.15"
+          # - "11.0" # See https://github.com/actions/virtual-environments/issues/2486
+        ruby-version:
+          - 2.7
+          - 2.6
+          - 2.5
 
     steps:
       - uses: actions/checkout@v2
