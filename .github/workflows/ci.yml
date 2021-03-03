@@ -7,6 +7,22 @@ on:
     branches: [main]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    name: Lint
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+          bundler-cache: true
+      - name: Install dependencies
+        run: bundle install
+      - name: Lint with Rubocop
+        run: bundle exec rubocop
+
   test:
     runs-on: "macos-${{ matrix.macos-version }}"
 
