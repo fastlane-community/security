@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../lib/security'
-include Security
-
 describe GenericPassword do
   let(:keychain) { Keychain.login_keychain } # FIXME: we should create a temporary keychain for tests
 

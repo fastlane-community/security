@@ -2,9 +2,6 @@
 
 require 'tempfile'
 
-require_relative '../lib/security'
-include Security
-
 describe Keychain do
   describe '#login_keychain' do
     subject { Keychain.login_keychain }

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../lib/security'
-include Security
-
 describe Certificate do
   describe '#find' do
     it 'should raise NotImplementedError' do
