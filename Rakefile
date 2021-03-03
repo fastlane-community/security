@@ -3,10 +3,8 @@
 require 'bundler'
 Bundler.setup
 
-gemspec = eval(File.read('security.gemspec'))
+require 'bundler/gem_tasks'
 
-task build: "#{gemspec.full_name}.gem"
-
-file "#{gemspec.full_name}.gem" => gemspec.files + ['security.gemspec'] do
-  system 'gem build security.gemspec'
+task :default do
+  system 'rake -T'
 end
