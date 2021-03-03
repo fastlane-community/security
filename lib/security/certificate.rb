@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Security
   class Certificate
     private_class_method :new
