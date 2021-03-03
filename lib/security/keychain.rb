@@ -2,7 +2,7 @@ require 'shellwords'
 
 module Security
   class Keychain
-    DOMAINS = [:user, :system, :common, :dynamic]
+    DOMAINS = %i[user system common dynamic]
 
     attr_reader :filename
 
@@ -11,19 +11,19 @@ module Security
     end
 
     def info
-      system %{security show-keychain-info #{@filename.shellescape}}
+      system %(security show-keychain-info #{@filename.shellescape})
     end
 
     def lock
-      system %{security lock-keychain #{@filename.shellescape}}
+      system %(security lock-keychain #{@filename.shellescape})
     end
 
     def unlock(password)
-      system %{security unlock-keychain -p #{password.shellescape} #{@filename.shellescape}}
+      system %(security unlock-keychain -p #{password.shellescape} #{@filename.shellescape})
     end
 
     def delete
-      system %{security delete-keychain #{@filename.shellescape}}
+      system %(security delete-keychain #{@filename.shellescape})
     end
 
     class << self
@@ -38,11 +38,11 @@ module Security
       end
 
       def lock
-        system %{security lock-keychain -a}
+        system %(security lock-keychain -a)
       end
 
       def unlock(password)
-        system %{security unlock-keychain -p #{password.shellescape}}
+        system %(security unlock-keychain -p #{password.shellescape})
       end
 
       def default_keychain
@@ -56,7 +56,7 @@ module Security
       private
 
       def keychains_from_output(output)
-        output.split(/\n/).collect{|line| new(line.strip.gsub(/^\"|\"$/, ""))}
+        output.split(/\n/).collect { |line| new(line.strip.gsub(/^"|"$/, '')) }
       end
     end
   end
