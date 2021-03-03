@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 require 'shellwords'
 
 module Security
+  # :nodoc:
   class Password
     attr_reader :keychain, :attributes, :password
 
@@ -16,17 +19,19 @@ module Security
       private
 
       def password_from_output(output)
-        return nil if /^security\: / === output
+        return nil if output.match?(/^security: /)
 
-        keychain, attributes, password = nil, {}, nil
+        keychain = nil
+        attributes = {}
+        password = nil
         output.split(/\n/).each do |line|
           case line
-          when /^keychain\: \"(.+)\"/
-            keychain = $1
-          when /\"(\w{4})\".+\=\"(.+)\"/
-            attributes[$1] = $2
-          when /^password\: \"(.+)\"/
-            password = $1
+          when /^keychain: "(.+)"/
+            keychain = Regexp.last_match(1)
+          when /"(\w{4})".+="(.+)"/
+            attributes[Regexp.last_match(1)] = Regexp.last_match(2)
+          when /^password: "(.+)"/
+            password = Regexp.last_match(1)
           end
         end
 
@@ -42,11 +47,12 @@ module Security
         flags[:G] ||= flags.delete(:value)
         flags[:j] ||= flags.delete(:comment)
 
-        flags.delete_if{|k,v| v.nil?}.collect{|k, v| "-#{k} #{v.shellescape}".strip}.join(" ")
+        flags.delete_if { |_k, v| v.nil? }.collect { |k, v| "-#{k} #{v.shellescape}".strip }.join(' ')
       end
     end
   end
 
+  # :nodoc:
   class GenericPassword < Password
     class << self
       def add(service, account, password, options = {})
@@ -74,6 +80,7 @@ module Security
     end
   end
 
+  # :nodoc:
   class InternetPassword < Password
     class << self
       def add(server, account, password, options = {})

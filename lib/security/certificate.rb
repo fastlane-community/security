@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 module Security
+  # :nodoc:
   class Certificate
     private_class_method :new
 
