@@ -10,6 +10,8 @@ jobs:
   test:
     runs-on: macos-latest
 
+    name: "Test (Ruby ${{ matrix.ruby-version }})"
+
     strategy:
       matrix:
         ruby-version: [2.7, 2.6, 2.5]
