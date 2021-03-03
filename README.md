@@ -4,9 +4,8 @@
 
 **A library for interacting with the macOS Keychain**
 
-> This library implements only the commands necessary for password management in
-> [Cupertino](https://github.com/mattt/cupertino).
-> As such, some methods are stubbed out to raise `NotImplementedError`.
+> This library provides only a subset of `security` subcommands,
+> and is not intended for general use.
 
 ## Usage
 
