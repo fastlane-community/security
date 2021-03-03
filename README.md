@@ -20,9 +20,5 @@ Security::InternetPassword.find(server: "itunesconnect.apple.com").password #=> 
 
 MIT
 
-## Contact
-
-Mattt ([@mattt](https://twitter.com/mattt))
-
 [build status]: https://github.com/mattt/Security/actions?query=workflow%3ACI
 [build status badge]: https://github.com/mattt/Security/workflows/CI/badge.svg
