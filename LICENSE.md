@@ -1,4 +1,4 @@
-Copyright (c) 2012 – 2021 Mattt (https://mat.tt/)
+Copyright (c) 2012 – 2021 The Fastlane Community Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
