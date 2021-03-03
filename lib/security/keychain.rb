@@ -3,6 +3,7 @@
 require 'shellwords'
 
 module Security
+  # :nodoc:
   class Keychain
     DOMAINS = %i[user system common dynamic].freeze
 

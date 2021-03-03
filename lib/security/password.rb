@@ -3,6 +3,7 @@
 require 'shellwords'
 
 module Security
+  # :nodoc:
   class Password
     attr_reader :keychain, :attributes, :password
 
@@ -51,6 +52,7 @@ module Security
     end
   end
 
+  # :nodoc:
   class GenericPassword < Password
     class << self
       def add(service, account, password, options = {})
@@ -78,6 +80,7 @@ module Security
     end
   end
 
+  # :nodoc:
   class InternetPassword < Password
     class << self
       def add(server, account, password, options = {})
