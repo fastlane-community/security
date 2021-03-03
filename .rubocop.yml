@@ -10,3 +10,5 @@ Metrics/MethodLength:
   Max: 30
 Metrics/PerceivedComplexity:
   Enabled: false
+Lint/AmbiguousBlockAssociation:
+  Enabled: false
