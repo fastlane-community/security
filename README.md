@@ -10,6 +10,8 @@
 ## Usage
 
 ```ruby
+require 'security'
+
 Security::Keychain::default_keychain.filename #=> "/Users/jappleseed/Library/Keychains/login.keychain"
 
 Security::InternetPassword.find(server: "itunesconnect.apple.com").password #=> "p4ssw0rd"
