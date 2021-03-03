@@ -19,7 +19,7 @@ module Security
       private
 
       def password_from_output(output)
-        return nil if /^security: / === output
+        return nil if output.match?(/^security: /)
 
         keychain = nil
         attributes = {}
