@@ -7,9 +7,10 @@ describe GenericPassword do
     let(:service) { 'com.example.service' }
     let(:account) { 'jappleseed' }
     let(:password) { 'p4ssw0rd!' }
+    let(:comment) { 'Some comment' }
 
     around(:example) do |example|
-      GenericPassword.add(service, account, password)
+      GenericPassword.add(service, account, password, comment: comment)
       example.run
       GenericPassword.delete({ service: service, account: account })
     end
@@ -19,7 +20,8 @@ describe GenericPassword do
       expect(entry.keychain.filename).to be == keychain.filename
       expect(entry.attributes).to include({
                                             'acct' => account,
-                                            'svce' => service
+                                            'svce' => service,
+                                            'icmt' => comment
                                           })
       expect(entry.password).to be == password
     end
@@ -32,10 +34,11 @@ describe InternetPassword do
   describe '#add' do
     let(:server) { 'example.com' }
     let(:account) { 'jappleseed@example.com' }
-    let(:password) { 'p4ssw0rd!' }
+    let(:password) { '•••p4ssw0rd!••' }
+    let(:comment) { '•••Some comment•••' }
 
     around(:example) do |example|
-      InternetPassword.add(server, account, password)
+      InternetPassword.add(server, account, password, comment: comment)
       example.run
       InternetPassword.delete({ server: server, account: account })
     end
@@ -45,7 +48,8 @@ describe InternetPassword do
       expect(entry.keychain.filename).to be == keychain.filename
       expect(entry.attributes).to include({
                                             'acct' => account,
-                                            'srvr' => server
+                                            'srvr' => server,
+                                            'icmt' => comment
                                           })
       expect(entry.password).to be == password
     end

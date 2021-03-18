@@ -30,8 +30,12 @@ module Security
             keychain = Regexp.last_match(1)
           when /"(\w{4})".+="(.+)"/
             attributes[Regexp.last_match(1)] = Regexp.last_match(2)
+          when /"(\w{4})"<blob>=0x([[:xdigit:]]+)/
+            attributes[Regexp.last_match(1)] = decode_hex_blob(Regexp.last_match(2))
           when /^password: "(.+)"/
             password = Regexp.last_match(1)
+          when /^password: 0x([[:xdigit:]]+)/
+            password = decode_hex_blob(Regexp.last_match(1))
           end
         end
 
@@ -48,6 +52,10 @@ module Security
         flags[:j] ||= flags.delete(:comment)
 
         flags.delete_if { |_k, v| v.nil? }.collect { |k, v| "-#{k} #{v.shellescape}".strip }.join(' ')
+      end
+
+      def decode_hex_blob(string)
+        [string].pack('H*').force_encoding('UTF-8')
       end
     end
   end
