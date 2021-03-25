@@ -1,6 +1,8 @@
 # Security
 
 [![Build Status][build status badge]][build status]
+[![Gem](https://img.shields.io/gem/v/security.svg?style=flat)](https://rubygems.org/gems/security)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/fastlane-community/security/blob/main/LICENSE.md)
 
 **A library for interacting with the macOS Keychain**
 

@@ -6,7 +6,7 @@ require 'security'
 Gem::Specification.new do |s|
   s.name        = 'security'
   s.authors     = ['Josh Holtz', 'Mattt']
-  s.email       = 'josh@rokkincat.com'
+  s.email       = 'me@joshholtz.com'
   s.homepage    = 'https://github.com/fastlane-community/security'
   s.version     = Security::VERSION
   s.platform    = Gem::Platform::RUBY
