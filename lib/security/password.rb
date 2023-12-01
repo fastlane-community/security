@@ -76,7 +76,7 @@ module Security
       end
 
       def delete(options)
-        system "security delete-generic-password #{flags_for_options(options)} 2>&1 >/dev/null"
+        system "security delete-generic-password #{flags_for_options(options)} >& /dev/null"
       end
 
       private
@@ -95,7 +95,6 @@ module Security
         options[:a] = account
         options[:s] = server
         options[:w] = password
-
         system "security add-internet-password #{flags_for_options(options)}"
       end
 
@@ -104,7 +103,7 @@ module Security
       end
 
       def delete(options)
-        system "security delete-internet-password #{flags_for_options(options)} 2>&1 >/dev/null"
+        system "security delete-internet-password #{flags_for_options(options)} >&/dev/null"
       end
 
       private
