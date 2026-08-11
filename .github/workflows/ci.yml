@@ -25,7 +25,7 @@ jobs:
 
   test:
     runs-on: macos-latest
-    name: "Test on macOS ${{ matrix.macos-version }} (Ruby ${{ matrix.ruby-version }})"
+    name: "Test on macOS (Ruby ${{ matrix.ruby-version }})"
     strategy:
       matrix:
         ruby-version:
@@ -48,4 +48,4 @@ jobs:
         run: bundle install
 
       - name: Run tests
-        run: bundle exec rspec --format documentation --format RSpec::Github::Formatter
+        run: bundle exec rspec
