@@ -11,6 +11,61 @@ describe Keychain do
     end
   end
 
+  describe '#default_keychain' do
+    subject { Keychain.default_keychain }
+
+    it 'should return a keychain' do
+      expect(subject).to be_a(Keychain)
+      expect(subject.filename).not_to be_empty
+    end
+  end
+
+  describe '#lock' do
+    it 'should lock all keychains' do
+      expect(Keychain).to receive(:system).with('security lock-keychain -a')
+      Keychain.lock
+    end
+  end
+
+  describe '#unlock' do
+    it 'should unlock keychains with the given password' do
+      expect(Keychain).to receive(:system).with('security unlock-keychain -p p4ssw0rd')
+      Keychain.unlock('p4ssw0rd')
+    end
+  end
+
+  describe 'an instance' do
+    subject { Keychain.new('test.keychain-db') }
+
+    describe '#info' do
+      it 'should show keychain info' do
+        expect(subject).to receive(:system).with('security show-keychain-info test.keychain-db')
+        subject.info
+      end
+    end
+
+    describe '#lock' do
+      it 'should lock the keychain' do
+        expect(subject).to receive(:system).with('security lock-keychain test.keychain-db')
+        subject.lock
+      end
+    end
+
+    describe '#unlock' do
+      it 'should unlock the keychain with the given password' do
+        expect(subject).to receive(:system).with('security unlock-keychain -p p4ssw0rd test.keychain-db')
+        subject.unlock('p4ssw0rd')
+      end
+    end
+
+    describe '#delete' do
+      it 'should delete the keychain' do
+        expect(subject).to receive(:system).with('security delete-keychain test.keychain-db')
+        subject.delete
+      end
+    end
+  end
+
   describe '#create' do
     let(:password) { 'p4ssw0rd!' }
 
