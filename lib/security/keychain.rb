@@ -59,7 +59,7 @@ module Security
       private
 
       def keychains_from_output(output)
-        output.split(/\n/).collect { |line| new(line.strip.gsub(/^"|"$/, '')) }
+        output.split("\n").collect { |line| new(line.strip.gsub(/^"|"$/, '')) }
       end
     end
   end
