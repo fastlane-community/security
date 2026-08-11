@@ -4,7 +4,7 @@ require_relative 'lib/security/version'
 
 Gem::Specification.new do |s|
   s.name        = 'security'
-  s.authors     = ['Josh Holtz', 'Mattt']
+  s.authors     = ['Josh Holtz', 'Mattt', 'iBotPeaches']
   s.email       = 'me@joshholtz.com'
   s.homepage    = 'https://github.com/fastlane-community/security'
   s.version     = Security::VERSION
@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.files         = Dir['./**/*'].grep_v(%r{\./(bin|log|pkg|script|spec|test|vendor)})
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 2.4.0'
+  s.required_ruby_version = '>= 3.0.0'
 
   s.metadata['rubygems_mfa_required'] = 'true'
 end
