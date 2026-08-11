@@ -24,7 +24,7 @@ module Security
         keychain = nil
         attributes = {}
         password = nil
-        output.split(/\n/).each do |line|
+        output.split("\n").each do |line|
           case line
           when /^keychain: "(.+)"/
             keychain = Regexp.last_match(1)
@@ -83,7 +83,7 @@ module Security
 
       def flags_for_options(options = {})
         options[:s] ||= options.delete(:service)
-        super(options)
+        super
       end
     end
   end
@@ -114,7 +114,7 @@ module Security
         options[:p] ||= options.delete(:path)
         options[:P] ||= options.delete(:port)
         options[:r] ||= options.delete(:protocol)
-        super(options)
+        super
       end
     end
   end
