@@ -9,6 +9,5 @@ end
 
 require_relative '../lib/security'
 
-# rubocop:disable Style/MixinUsage
+# rubocop:disable-next Style/MixinUsage
 include Security
-# rubocop:enable Style/MixinUsage
