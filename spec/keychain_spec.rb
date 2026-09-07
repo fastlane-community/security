@@ -101,5 +101,17 @@ describe Keychain do
         )
       end
     end
+
+    describe 'when the security command fails' do
+      it 'should raise an error carrying the status and the output' do
+        status = instance_double(Process::Status, success?: false, exitstatus: 1)
+        allow(Open3).to receive(:capture3).and_return(['', "security: unknown command\n", status])
+
+        expect { Keychain.list }.to raise_error(Security::Error) do |error|
+          expect(error.status).to be == 1
+          expect(error.message).to match(/unknown command/)
+        end
+      end
+    end
   end
 end

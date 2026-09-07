@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'open3'
 require 'shellwords'
 
 module Security
@@ -37,7 +38,7 @@ module Security
       def list(domain = :user)
         raise ArgumentError, "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
 
-        keychains_from_output(`security list-keychains -d #{domain}`)
+        keychains_from_command("security list-keychains -d #{domain}")
       end
 
       def lock
@@ -49,14 +50,21 @@ module Security
       end
 
       def default_keychain
-        keychains_from_output(`security default-keychain`).first
+        keychains_from_command('security default-keychain').first
       end
 
       def login_keychain
-        keychains_from_output(`security login-keychain`).first
+        keychains_from_command('security login-keychain').first
       end
 
       private
+
+      def keychains_from_command(command)
+        out, err, status = Open3.capture3(command)
+        raise Error.new(status.exitstatus, err) unless status.success?
+
+        keychains_from_output(out)
+      end
 
       def keychains_from_output(output)
         output.split("\n").collect { |line| new(line.strip.gsub(/^"|"$/, '')) }
