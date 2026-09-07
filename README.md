@@ -1,6 +1,6 @@
 # Security
 
-[![Build Status][build status badge]][build status]
+[![CI](https://github.com/fastlane-community/security/actions/workflows/ci.yml/badge.svg)](https://github.com/fastlane-community/security/actions/workflows/ci.yml)
 [![Gem](https://img.shields.io/gem/v/security.svg?style=flat)](https://rubygems.org/gems/security)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/fastlane-community/security/blob/main/LICENSE.md)
 
@@ -62,22 +62,6 @@ The methods that change the keychain — `add`, `delete`, and the `Keychain`
 instance methods — return `true` or `false` and print what the tool reported,
 the way `Kernel#system` does.
 
-### Upgrading from 0.2
-
-`find` used to detect failure by looking for a `security: ` prefix in the
-output. Anything else — an ACL error, which prints nothing at all, or a
-malformed request, which prints a usage banner — fell through and produced a
-`Password` with no keychain, no attributes and a `nil` password, which a caller
-could not tell from a real hit. Failures that did carry that prefix returned
-`nil`, indistinguishable from an item that was simply absent.
-
-Both now raise `Security::Error`. Callers that treat `nil` as "not in the
-keychain, fall back" should rescue it, as above, rather than let a locked
-keychain look like an empty one.
-
 ## License
 
-MIT
-
-[build status]: https://github.com/mattt/Security/actions?query=workflow%3ACI
-[build status badge]: https://github.com/mattt/Security/workflows/CI/badge.svg
+[MIT](https://github.com/fastlane-community/security/blob/main/LICENSE.md)
