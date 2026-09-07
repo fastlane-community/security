@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tmpdir'
+
 describe GenericPassword do
   let(:keychain) { Keychain.login_keychain } # FIXME: we should create a temporary keychain for tests
 
@@ -114,6 +116,56 @@ describe InternetPassword do
                                             })
         expect(entry.password).to be == password
       end
+    end
+  end
+end
+
+describe 'a non-default keychain' do
+  # `security` reports the resolved path, and Dir.tmpdir is a symlink on macOS
+  let(:filename) { File.join(File.realpath(Dir.tmpdir), 'security-spec.keychain-db') }
+  let(:keychain) { Keychain.new(filename) }
+  let(:service) { 'com.example.service' }
+  let(:account) { 'jappleseed' }
+  let(:password) { 'p4ssw0rd!' }
+
+  around(:example) do |example|
+    Security::Command.run("security create-keychain -p spec-password #{filename.shellescape}")
+    example.run
+    Security::Command.run("security delete-keychain #{filename.shellescape}")
+  end
+
+  describe '#add' do
+    it 'should add the password to the given keychain' do
+      expect(GenericPassword.add(service, account, password, keychain: filename)).to be true
+
+      entry = GenericPassword.find(service: service, keychain: filename)
+      expect(entry.keychain.filename).to be == filename
+      expect(entry.password).to be == password
+    end
+
+    it 'should not add the password to the default keychain' do
+      GenericPassword.add(service, account, password, keychain: filename)
+
+      expect(GenericPassword.find(service: service)).to be_nil
+    end
+  end
+
+  describe '#delete' do
+    it 'should delete the password from the given keychain' do
+      GenericPassword.add(service, account, password, keychain: filename)
+
+      expect(GenericPassword.delete(service: service, keychain: filename)).to be true
+      expect(GenericPassword.find(service: service, keychain: filename)).to be_nil
+    end
+  end
+
+  describe 'when given a Keychain' do
+    it 'should act on the keychain it names' do
+      GenericPassword.add(service, account, password, keychain: keychain)
+
+      entry = GenericPassword.find(service: service, keychain: keychain)
+      expect(entry.keychain.filename).to be == filename
+      expect(entry.password).to be == password
     end
   end
 end
