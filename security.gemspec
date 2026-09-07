@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.files         = Dir['./**/*'].grep_v(%r{\./(bin|log|pkg|script|spec|test|vendor)})
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
-  s.required_ruby_version = '>= 3.0.0'
+  s.required_ruby_version = '>= 3.1.0'
 
   s.metadata['rubygems_mfa_required'] = 'true'
 end
