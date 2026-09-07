@@ -20,6 +20,20 @@ item = Security::InternetPassword.find(server: "itunesconnect.apple.com")
 item&.password #=> "p4ssw0rd"
 ```
 
+## Keychains
+
+`find`, `add` and `delete` all take an optional `keychain:`, naming the keychain
+to act on. It accepts a `Security::Keychain` or a path. Without one, `security`
+adds to the default keychain and searches the default search list.
+
+```ruby
+keychain = Security::Keychain.new("/path/to/build.keychain-db")
+
+Security::InternetPassword.add("example.com", "jappleseed", "p4ssw0rd", keychain: keychain)
+Security::InternetPassword.find(server: "example.com", keychain: keychain)
+Security::InternetPassword.delete(server: "example.com", keychain: keychain)
+```
+
 ## Errors
 
 The `security` command line tool reports failures through its exit status, and

@@ -54,6 +54,7 @@ module Security
 
       def flags_for_options(options = {})
         flags = options.dup
+        keychain = flags.delete(:keychain)
         flags[:a] ||= flags.delete(:account)
         flags[:c] ||= flags.delete(:creator)
         flags[:C] ||= flags.delete(:type)
@@ -61,7 +62,18 @@ module Security
         flags[:G] ||= flags.delete(:value)
         flags[:j] ||= flags.delete(:comment)
 
-        flags.compact.collect { |k, v| "-#{k} #{v.shellescape}".strip }.join(' ')
+        arguments = flags.compact.collect { |k, v| "-#{k} #{v.shellescape}".strip }
+        arguments << filename_for_keychain(keychain) if keychain
+
+        arguments.join(' ')
+      end
+
+      # `security` takes the keychain to act on as a trailing argument. Without
+      # one it uses the default keychain, or the default search list.
+      def filename_for_keychain(keychain)
+        filename = keychain.is_a?(Keychain) ? keychain.filename : keychain
+
+        filename.shellescape
       end
 
       def decode_hex_blob(string)
