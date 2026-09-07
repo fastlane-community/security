@@ -13,3 +13,6 @@ Metrics/PerceivedComplexity:
   Enabled: false
 Lint/AmbiguousBlockAssociation:
   Enabled: false
+Naming/PredicateMethod:
+  # The command methods report success like Kernel#system, which they replace.
+  Enabled: false

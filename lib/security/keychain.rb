@@ -14,19 +14,19 @@ module Security
     end
 
     def info
-      system %(security show-keychain-info #{@filename.shellescape})
+      Command.relay(%(security show-keychain-info #{@filename.shellescape})).success?
     end
 
     def lock
-      system %(security lock-keychain #{@filename.shellescape})
+      Command.relay(%(security lock-keychain #{@filename.shellescape})).success?
     end
 
     def unlock(password)
-      system %(security unlock-keychain -p #{password.shellescape} #{@filename.shellescape})
+      Command.relay(%(security unlock-keychain -p #{password.shellescape} #{@filename.shellescape})).success?
     end
 
     def delete
-      system %(security delete-keychain #{@filename.shellescape})
+      Command.relay(%(security delete-keychain #{@filename.shellescape})).success?
     end
 
     class << self
@@ -35,28 +35,35 @@ module Security
       end
 
       def list(domain = :user)
-        raise ArgumentError "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
+        raise ArgumentError, "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
 
-        keychains_from_output(`security list-keychains -d #{domain}`)
+        keychains_from_command("security list-keychains -d #{domain}")
       end
 
       def lock
-        system %(security lock-keychain -a)
+        Command.relay(%(security lock-keychain -a)).success?
       end
 
       def unlock(password)
-        system %(security unlock-keychain -p #{password.shellescape})
+        Command.relay(%(security unlock-keychain -p #{password.shellescape})).success?
       end
 
       def default_keychain
-        keychains_from_output(`security default-keychain`).first
+        keychains_from_command('security default-keychain').first
       end
 
       def login_keychain
-        keychains_from_output(`security login-keychain`).first
+        keychains_from_command('security login-keychain').first
       end
 
       private
+
+      def keychains_from_command(command)
+        result = Command.run(command)
+        raise Error.new(result.exitstatus, result.stderr) unless result.success?
+
+        keychains_from_output(result.stdout)
+      end
 
       def keychains_from_output(output)
         output.split("\n").collect { |line| new(line.strip.gsub(/^"|"$/, '')) }
