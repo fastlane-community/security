@@ -95,8 +95,10 @@ describe Keychain do
     end
 
     describe 'when passing an invalid domain' do
-      it 'should raise an error' do
-        expect { Keychain.list(:invalid) }.to raise_error(NoMethodError) # FIXME
+      it 'should raise an error naming the valid domains' do
+        expect { Keychain.list(:invalid) }.to raise_error(
+          ArgumentError, 'Invalid domain invalid, expected one of: [:user, :system, :common, :dynamic]'
+        )
       end
     end
   end

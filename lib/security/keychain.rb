@@ -35,7 +35,7 @@ module Security
       end
 
       def list(domain = :user)
-        raise ArgumentError "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
+        raise ArgumentError, "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
 
         keychains_from_output(`security list-keychains -d #{domain}`)
       end
