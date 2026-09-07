@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'open3'
 require 'shellwords'
 
 module Security
@@ -24,12 +23,11 @@ module Security
       private
 
       def password_from_command(command)
-        out, err, status = Open3.capture3(command)
-        return nil if status.exitstatus == ITEM_NOT_FOUND
-        raise Error.new(status.exitstatus, err) unless status.success?
+        result = Command.run(command)
+        return nil if result.exitstatus == ITEM_NOT_FOUND
+        raise Error.new(result.exitstatus, result.stderr) unless result.success?
 
-        # `security -g` prints the attributes on stdout and the password on stderr.
-        password_from_output(out + err)
+        password_from_output(result.output)
       end
 
       def password_from_output(output)
@@ -80,7 +78,7 @@ module Security
         options[:s] = service
         options[:w] = password
 
-        system "security add-generic-password #{flags_for_options(options)}"
+        Command.relay("security add-generic-password #{flags_for_options(options)}").success?
       end
 
       def find(options)
@@ -88,7 +86,7 @@ module Security
       end
 
       def delete(options)
-        system "security delete-generic-password #{flags_for_options(options)} >& /dev/null"
+        Command.run("security delete-generic-password #{flags_for_options(options)}").success?
       end
 
       private
@@ -107,7 +105,7 @@ module Security
         options[:a] = account
         options[:s] = server
         options[:w] = password
-        system "security add-internet-password #{flags_for_options(options)}"
+        Command.relay("security add-internet-password #{flags_for_options(options)}").success?
       end
 
       def find(options)
@@ -115,7 +113,7 @@ module Security
       end
 
       def delete(options)
-        system "security delete-internet-password #{flags_for_options(options)} >&/dev/null"
+        Command.run("security delete-internet-password #{flags_for_options(options)}").success?
       end
 
       private

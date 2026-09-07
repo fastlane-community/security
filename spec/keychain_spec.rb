@@ -3,6 +3,8 @@
 require 'tempfile'
 
 describe Keychain do
+  let(:succeeded) { Security::Command.run('true') }
+
   describe '#login_keychain' do
     subject { Keychain.login_keychain }
 
@@ -22,14 +24,16 @@ describe Keychain do
 
   describe '#lock' do
     it 'should lock all keychains' do
-      expect(Keychain).to receive(:system).with('security lock-keychain -a')
+      expect(Security::Command).to receive(:relay)
+        .with('security lock-keychain -a').and_return(succeeded)
       Keychain.lock
     end
   end
 
   describe '#unlock' do
     it 'should unlock keychains with the given password' do
-      expect(Keychain).to receive(:system).with('security unlock-keychain -p p4ssw0rd')
+      expect(Security::Command).to receive(:relay)
+        .with('security unlock-keychain -p p4ssw0rd').and_return(succeeded)
       Keychain.unlock('p4ssw0rd')
     end
   end
@@ -39,28 +43,32 @@ describe Keychain do
 
     describe '#info' do
       it 'should show keychain info' do
-        expect(subject).to receive(:system).with('security show-keychain-info test.keychain-db')
+        expect(Security::Command).to receive(:relay)
+          .with('security show-keychain-info test.keychain-db').and_return(succeeded)
         subject.info
       end
     end
 
     describe '#lock' do
       it 'should lock the keychain' do
-        expect(subject).to receive(:system).with('security lock-keychain test.keychain-db')
+        expect(Security::Command).to receive(:relay)
+          .with('security lock-keychain test.keychain-db').and_return(succeeded)
         subject.lock
       end
     end
 
     describe '#unlock' do
       it 'should unlock the keychain with the given password' do
-        expect(subject).to receive(:system).with('security unlock-keychain -p p4ssw0rd test.keychain-db')
+        expect(Security::Command).to receive(:relay)
+          .with('security unlock-keychain -p p4ssw0rd test.keychain-db').and_return(succeeded)
         subject.unlock('p4ssw0rd')
       end
     end
 
     describe '#delete' do
       it 'should delete the keychain' do
-        expect(subject).to receive(:system).with('security delete-keychain test.keychain-db')
+        expect(Security::Command).to receive(:relay)
+          .with('security delete-keychain test.keychain-db').and_return(succeeded)
         subject.delete
       end
     end

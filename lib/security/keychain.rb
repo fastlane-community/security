@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'open3'
 require 'shellwords'
 
 module Security
@@ -15,19 +14,19 @@ module Security
     end
 
     def info
-      system %(security show-keychain-info #{@filename.shellescape})
+      Command.relay(%(security show-keychain-info #{@filename.shellescape})).success?
     end
 
     def lock
-      system %(security lock-keychain #{@filename.shellescape})
+      Command.relay(%(security lock-keychain #{@filename.shellescape})).success?
     end
 
     def unlock(password)
-      system %(security unlock-keychain -p #{password.shellescape} #{@filename.shellescape})
+      Command.relay(%(security unlock-keychain -p #{password.shellescape} #{@filename.shellescape})).success?
     end
 
     def delete
-      system %(security delete-keychain #{@filename.shellescape})
+      Command.relay(%(security delete-keychain #{@filename.shellescape})).success?
     end
 
     class << self
@@ -42,11 +41,11 @@ module Security
       end
 
       def lock
-        system %(security lock-keychain -a)
+        Command.relay(%(security lock-keychain -a)).success?
       end
 
       def unlock(password)
-        system %(security unlock-keychain -p #{password.shellescape})
+        Command.relay(%(security unlock-keychain -p #{password.shellescape})).success?
       end
 
       def default_keychain
@@ -60,10 +59,10 @@ module Security
       private
 
       def keychains_from_command(command)
-        out, err, status = Open3.capture3(command)
-        raise Error.new(status.exitstatus, err) unless status.success?
+        result = Command.run(command)
+        raise Error.new(result.exitstatus, result.stderr) unless result.success?
 
-        keychains_from_output(out)
+        keychains_from_output(result.stdout)
       end
 
       def keychains_from_output(output)
