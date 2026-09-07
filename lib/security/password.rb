@@ -51,7 +51,7 @@ module Security
         flags[:G] ||= flags.delete(:value)
         flags[:j] ||= flags.delete(:comment)
 
-        flags.delete_if { |_k, v| v.nil? }.collect { |k, v| "-#{k} #{v.shellescape}".strip }.join(' ')
+        flags.compact.collect { |k, v| "-#{k} #{v.shellescape}".strip }.join(' ')
       end
 
       def decode_hex_blob(string)
