@@ -5,6 +5,7 @@ require 'open3'
 module Security
   # :nodoc:
   module Command
+    # TODO: replace with Data.define once Ruby 3.1 support is dropped.
     # :nodoc:
     Result = Struct.new(:stdout, :stderr, :status) do
       def success?
