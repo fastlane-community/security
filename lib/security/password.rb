@@ -1,10 +1,15 @@
 # frozen_string_literal: true
 
+require 'open3'
 require 'shellwords'
 
 module Security
   # :nodoc:
   class Password
+    # `security` reports a missing item with this exit status. Every other
+    # non-zero status is a failure the caller needs to know about.
+    ITEM_NOT_FOUND = 44
+
     attr_reader :keychain, :attributes, :password
 
     private_class_method :new
@@ -18,9 +23,16 @@ module Security
     class << self
       private
 
-      def password_from_output(output)
-        return nil if output.match?(/^security: /)
+      def password_from_command(command)
+        out, err, status = Open3.capture3(command)
+        return nil if status.exitstatus == ITEM_NOT_FOUND
+        raise Error.new(status.exitstatus, err) unless status.success?
 
+        # `security -g` prints the attributes on stdout and the password on stderr.
+        password_from_output(out + err)
+      end
+
+      def password_from_output(output)
         keychain = nil
         attributes = {}
         password = nil
@@ -72,7 +84,7 @@ module Security
       end
 
       def find(options)
-        password_from_output(`security 2>&1 find-generic-password -g #{flags_for_options(options)}`)
+        password_from_command("security find-generic-password -g #{flags_for_options(options)}")
       end
 
       def delete(options)
@@ -99,7 +111,7 @@ module Security
       end
 
       def find(options)
-        password_from_output(`security 2>&1 find-internet-password -g #{flags_for_options(options)}`)
+        password_from_command("security find-internet-password -g #{flags_for_options(options)}")
       end
 
       def delete(options)

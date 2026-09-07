@@ -26,6 +26,23 @@ describe GenericPassword do
       expect(entry.password).to be == password
     end
   end
+
+  describe '#find' do
+    describe 'when no matching item exists' do
+      it 'should return nil' do
+        expect(GenericPassword.find(service: 'com.example.no-such-service')).to be_nil
+      end
+    end
+
+    describe 'when the security command fails' do
+      it 'should raise an error carrying the status and the output' do
+        expect { GenericPassword.find(Z: 'bogus') }.to raise_error(Security::Error) do |error|
+          expect(error.status).to be == 2
+          expect(error.message).to match(/illegal option/)
+        end
+      end
+    end
+  end
 end
 
 describe InternetPassword do
