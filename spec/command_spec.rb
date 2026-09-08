@@ -28,6 +28,28 @@ describe Security::Command do
     end
   end
 
+  describe '.run when the command does not exist' do
+    subject { Security::Command.run('security-does-not-exist') }
+
+    it 'should report a failure rather than raising' do
+      expect(subject.success?).to be false
+      expect(subject.stderr).to match(/No such file or directory/)
+    end
+
+    it 'should report the status a shell gives a missing command' do
+      expect(subject.exitstatus).to be == 127
+    end
+  end
+
+  describe 'a result for a command that never ran' do
+    subject { Security::Command::Result.new('', '', nil) }
+
+    it 'should not be a success' do
+      expect(subject.success?).to be false
+      expect(subject.exitstatus).to be_nil
+    end
+  end
+
   describe '.relay' do
     it 'should relay what the command printed and return the result' do
       result = nil
