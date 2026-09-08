@@ -169,3 +169,41 @@ describe 'a non-default keychain' do
     end
   end
 end
+
+describe 'when `security` is not available' do
+  # Every platform other than macOS. The tool used to be reached through a
+  # shell, which reported a missing command as status 127; callers depend on
+  # seeing a failure rather than an exception escaping the library.
+  around(:example) do |example|
+    original = ENV.fetch('PATH', nil)
+    ENV['PATH'] = '/nonexistent'
+    begin
+      example.run
+    ensure
+      ENV['PATH'] = original
+    end
+  end
+
+  describe '#find' do
+    it 'should raise a Security::Error carrying the status' do
+      expect { GenericPassword.find(service: 'com.example.service') }.to raise_error(Security::Error) do |error|
+        expect(error.status).to be == 127
+        expect(error.message).to match(/No such file or directory/)
+      end
+    end
+  end
+
+  describe '#add' do
+    it 'should report failure rather than raising, relaying what went wrong' do
+      expect do
+        expect(GenericPassword.add('com.example.service', 'jappleseed', 'p4ssw0rd')).to be false
+      end.to output(/No such file or directory/).to_stderr
+    end
+  end
+
+  describe '#delete' do
+    it 'should report failure rather than raising' do
+      expect(GenericPassword.delete(service: 'com.example.service')).to be false
+    end
+  end
+end

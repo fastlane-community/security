@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'English'
 require 'open3'
 
 module Security
@@ -9,11 +10,11 @@ module Security
     # :nodoc:
     Result = Struct.new(:stdout, :stderr, :status) do
       def success?
-        status.success?
+        !status.nil? && status.success?
       end
 
       def exitstatus
-        status.exitstatus
+        status&.exitstatus
       end
 
       # `security` splits what it has to say across both streams: find-*-password
@@ -25,9 +26,17 @@ module Security
 
     module_function
 
-    # Runs a `security` subcommand and captures what it produced.
+    # Runs a `security` subcommand and captures what it produced. A missing
+    # `security` is a failed result rather than an exception: the tool is only
+    # present on macOS, and callers elsewhere should see the same failure they
+    # would get from a keychain that could not answer.
     def run(command)
       Result.new(*Open3.capture3(command))
+    rescue Errno::ENOENT => e
+      # Nothing ran, but the child Ruby forked exited 127 before exec, which is
+      # what a shell reports for a missing command, and what this library
+      # produced while it still went through one.
+      Result.new('', "#{e.message}\n", $CHILD_STATUS)
     end
 
     # Runs a `security` subcommand and lets the caller see what it said. The
