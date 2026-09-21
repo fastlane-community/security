@@ -23,17 +23,29 @@ jobs:
       - name: Lint with Rubocop
         run: bundle exec rubocop
 
+  # Two sweeps rather than a cross product. Ruby is unlikely to change how
+  # `security` formats what this library parses; a macOS release is. See #29.
   test:
-    runs-on: macos-latest
-    name: "Test on macOS (Ruby ${{ matrix.ruby-version }})"
+    runs-on: ${{ matrix.os }}
+    name: "Test on ${{ matrix.os }} (Ruby ${{ matrix.ruby-version }})"
     strategy:
+      fail-fast: false
       matrix:
-        ruby-version:
-          - '4.0'
-          - '3.4'
-          - '3.3'
-          - '3.2'
-          - '3.1'
+        # Every Ruby we support, against one pinned macOS.
+        os: ['macos-26']
+        ruby-version: ['4.0', '3.4', '3.3', '3.2', '3.1']
+        include:
+          # Every macOS we can reach, against one Ruby. `macos-26` is covered
+          # above. Pinned rather than `macos-latest`, which moves without
+          # telling anyone and records nothing about what it tested.
+          - os: 'macos-15'
+            ruby-version: '3.4'
+          - os: 'macos-14'
+            ruby-version: '3.4'
+          # Intel, in case anything here turns out to be architecture
+          # dependent. The arm64 runners above are all Apple silicon.
+          - os: 'macos-15-intel'
+            ruby-version: '3.4'
 
     steps:
       - uses: actions/checkout@v7
