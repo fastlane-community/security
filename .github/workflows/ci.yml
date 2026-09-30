@@ -2,8 +2,8 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, including stacked ones that target another branch
   pull_request:
-    branches: [main]
 
 jobs:
   lint:
