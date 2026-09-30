@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'shellwords'
-
 module Security
   # :nodoc:
   class Password
@@ -22,8 +20,8 @@ module Security
     class << self
       private
 
-      def password_from_command(command)
-        result = Command.run(command)
+      def password_from_command(*command)
+        result = Command.run(*command)
         return nil if result.exitstatus == ITEM_NOT_FOUND
         raise Error.new(result.exitstatus, result.stderr) unless result.success?
 
@@ -62,18 +60,16 @@ module Security
         flags[:G] ||= flags.delete(:value)
         flags[:j] ||= flags.delete(:comment)
 
-        arguments = flags.compact.collect { |k, v| "-#{k} #{v.shellescape}".strip }
+        arguments = flags.compact.flat_map { |k, v| ["-#{k}", v.to_s] }
         arguments << filename_for_keychain(keychain) if keychain
 
-        arguments.join(' ')
+        arguments
       end
 
       # `security` takes the keychain to act on as a trailing argument. Without
       # one it uses the default keychain, or the default search list.
       def filename_for_keychain(keychain)
-        filename = keychain.is_a?(Keychain) ? keychain.filename : keychain
-
-        filename.shellescape
+        keychain.is_a?(Keychain) ? keychain.filename : keychain.to_s
       end
 
       def decode_hex_blob(string)
@@ -90,15 +86,15 @@ module Security
         options[:s] = service
         options[:w] = password
 
-        Command.relay("security add-generic-password #{flags_for_options(options)}").success?
+        Command.relay('security', 'add-generic-password', *flags_for_options(options)).success?
       end
 
       def find(options)
-        password_from_command("security find-generic-password -g #{flags_for_options(options)}")
+        password_from_command('security', 'find-generic-password', '-g', *flags_for_options(options))
       end
 
       def delete(options)
-        Command.run("security delete-generic-password #{flags_for_options(options)}").success?
+        Command.run('security', 'delete-generic-password', *flags_for_options(options)).success?
       end
 
       private
@@ -117,15 +113,15 @@ module Security
         options[:a] = account
         options[:s] = server
         options[:w] = password
-        Command.relay("security add-internet-password #{flags_for_options(options)}").success?
+        Command.relay('security', 'add-internet-password', *flags_for_options(options)).success?
       end
 
       def find(options)
-        password_from_command("security find-internet-password -g #{flags_for_options(options)}")
+        password_from_command('security', 'find-internet-password', '-g', *flags_for_options(options))
       end
 
       def delete(options)
-        Command.run("security delete-internet-password #{flags_for_options(options)}").success?
+        Command.run('security', 'delete-internet-password', *flags_for_options(options)).success?
       end
 
       private
