@@ -30,8 +30,15 @@ module Security
     # `security` is a failed result rather than an exception: the tool is only
     # present on macOS, and callers elsewhere should see the same failure they
     # would get from a keychain that could not answer.
-    def run(command)
-      Result.new(*Open3.capture3(command))
+    #
+    # Never through a shell, so a path containing a space or a quote needs no
+    # escaping:
+    #
+    #   run("security", "show-keychain-info", path)
+    def run(program, *)
+      # [program, program] rather than program: Ruby hands a lone string with
+      # shell metacharacters to a shell.
+      Result.new(*Open3.capture3([program, program], *))
     rescue Errno::ENOENT => e
       # Nothing ran, but the child Ruby forked exited 127 before exec, which is
       # what a shell reports for a missing command, and what this library
@@ -42,8 +49,8 @@ module Security
     # Runs a `security` subcommand and lets the caller see what it said. The
     # tool reports on stderr whether or not it succeeded: show-keychain-info
     # prints its result there on exit 0.
-    def relay(command)
-      result = run(command)
+    def relay(*command)
+      result = run(*command)
       warn result.stderr.chomp unless result.stderr.empty?
 
       result
