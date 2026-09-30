@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'shellwords'
-
 module Security
   # :nodoc:
   class Keychain
@@ -14,19 +12,19 @@ module Security
     end
 
     def info
-      Command.relay(%(security show-keychain-info #{@filename.shellescape})).success?
+      Command.relay('security', 'show-keychain-info', @filename).success?
     end
 
     def lock
-      Command.relay(%(security lock-keychain #{@filename.shellescape})).success?
+      Command.relay('security', 'lock-keychain', @filename).success?
     end
 
     def unlock(password)
-      Command.relay(%(security unlock-keychain -p #{password.shellescape} #{@filename.shellescape})).success?
+      Command.relay('security', 'unlock-keychain', '-p', password.to_s, @filename).success?
     end
 
     def delete
-      Command.relay(%(security delete-keychain #{@filename.shellescape})).success?
+      Command.relay('security', 'delete-keychain', @filename).success?
     end
 
     class << self
@@ -35,31 +33,35 @@ module Security
       end
 
       def list(domain = :user)
-        raise ArgumentError, "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
-
-        keychains_from_command("security list-keychains -d #{domain}")
+        keychains_from_command('security', 'list-keychains', '-d', domain_name(domain))
       end
 
       def lock
-        Command.relay(%(security lock-keychain -a)).success?
+        Command.relay('security', 'lock-keychain', '-a').success?
       end
 
       def unlock(password)
-        Command.relay(%(security unlock-keychain -p #{password.shellescape})).success?
+        Command.relay('security', 'unlock-keychain', '-p', password.to_s).success?
       end
 
       def default_keychain
-        keychains_from_command('security default-keychain').first
+        keychains_from_command('security', 'default-keychain').first
       end
 
       def login_keychain
-        keychains_from_command('security login-keychain').first
+        keychains_from_command('security', 'login-keychain').first
       end
 
       private
 
-      def keychains_from_command(command)
-        result = Command.run(command)
+      def domain_name(domain)
+        raise ArgumentError, "Invalid domain #{domain}, expected one of: #{DOMAINS}" unless DOMAINS.include?(domain)
+
+        domain.to_s
+      end
+
+      def keychains_from_command(*command)
+        result = Command.run(*command)
         raise Error.new(result.exitstatus, result.stderr) unless result.success?
 
         keychains_from_output(result.stdout)
