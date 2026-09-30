@@ -34,6 +34,17 @@ Security::InternetPassword.find(server: "example.com", keychain: keychain)
 Security::InternetPassword.delete(server: "example.com", keychain: keychain)
 ```
 
+Keychains themselves:
+
+```ruby
+keychain = Security::Keychain.create("/path/to/build.keychain-db", "p4ssw0rd")
+keychain.update_settings(timeout: 3600, lock_when_sleeping: true)
+keychain.set_key_partition_list("p4ssw0rd")
+
+Security::Keychain.set_search_list(Security::Keychain.list + [keychain])
+Security::Keychain.set_default_keychain(keychain)
+```
+
 ## Certificates and identities
 
 ```ruby
@@ -64,15 +75,19 @@ end
 ```
 
 `Keychain.list`, `Keychain.default_keychain`, `Keychain.login_keychain`,
-`Certificate.find` and `Identity.find` raise `Security::Error` on failure in the
-same way. `Certificate.find` and `Identity.find` return an empty array when
-nothing matched.
+`Keychain.create`, `Certificate.find` and `Identity.find` raise `Security::Error`
+on failure in the same way. `Certificate.find` and `Identity.find` return an
+empty array when nothing matched.
 
-The methods that change the keychain — `add`, `delete`, and the `Keychain`
-instance methods — return `true` or `false` and print what the tool reported,
-the way `Kernel#system` does. `Certificate.import` raises instead, because the
-caller needs to know why it failed: `Security::DuplicateItemError` when the
-keychain already holds the item, and `Security::Error` for any other failure.
+The methods that change the keychain — `add`, `delete` and the `Keychain`
+setters — return `true` or `false` and print what the tool reported, the way
+`Kernel#system` does. Two raise instead, because the caller needs to know why
+they failed:
+
+- `Certificate.import` raises `Security::DuplicateItemError` when the keychain
+  already holds the item, and `Security::Error` for any other failure.
+- `Keychain#set_key_partition_list` raises `Security::Error`, most often for a
+  wrong keychain password.
 
 ## License
 
