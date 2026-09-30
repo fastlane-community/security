@@ -34,6 +34,13 @@ Security::InternetPassword.find(server: "example.com", keychain: keychain)
 Security::InternetPassword.delete(server: "example.com", keychain: keychain)
 ```
 
+## Certificates and identities
+
+```ruby
+Security::Certificate.import("/path/to/identity.p12", keychain: keychain, password: "p12 password")
+Security::Certificate.find(name: "Developer ID Installer", keychain: keychain).map(&:sha1)
+```
+
 ## Errors
 
 The `security` command line tool reports failures through its exit status, and
@@ -55,12 +62,15 @@ rescue Security::Error => e
 end
 ```
 
-`Keychain.list`, `Keychain.default_keychain` and `Keychain.login_keychain`
-raise `Security::Error` on failure in the same way.
+`Keychain.list`, `Keychain.default_keychain`, `Keychain.login_keychain` and
+`Certificate.find` raise `Security::Error` on failure in the same way.
+`Certificate.find` returns an empty array when nothing matched.
 
 The methods that change the keychain — `add`, `delete`, and the `Keychain`
 instance methods — return `true` or `false` and print what the tool reported,
-the way `Kernel#system` does.
+the way `Kernel#system` does. `Certificate.import` raises instead, because the
+caller needs to know why it failed: `Security::DuplicateItemError` when the
+keychain already holds the item, and `Security::Error` for any other failure.
 
 ## License
 
