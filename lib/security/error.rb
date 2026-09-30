@@ -13,4 +13,7 @@ module Security
       super(details.empty? ? "`security` exited with status #{status}" : "#{details} (status #{status})")
     end
   end
+
+  # Raised when the keychain already holds the item being added.
+  class DuplicateItemError < Error; end
 end
