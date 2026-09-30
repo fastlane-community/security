@@ -34,6 +34,15 @@ Security::InternetPassword.find(server: "example.com", keychain: keychain)
 Security::InternetPassword.delete(server: "example.com", keychain: keychain)
 ```
 
+## Certificates, identities and profiles
+
+```ruby
+Security::ProvisioningProfile.decode("/path/to/profile.mobileprovision", keychain: keychain) #=> plist XML
+```
+
+`security cms -D` imports the profile's signing certificate into a keychain to
+verify it: into the one given, or the default keychain without one.
+
 ## Errors
 
 The `security` command line tool reports failures through its exit status, and
@@ -55,8 +64,8 @@ rescue Security::Error => e
 end
 ```
 
-`Keychain.list`, `Keychain.default_keychain` and `Keychain.login_keychain`
-raise `Security::Error` on failure in the same way.
+`Keychain.list`, `Keychain.default_keychain`, `Keychain.login_keychain` and
+`ProvisioningProfile.decode` raise `Security::Error` on failure in the same way.
 
 The methods that change the keychain — `add`, `delete`, and the `Keychain`
 instance methods — return `true` or `false` and print what the tool reported,
