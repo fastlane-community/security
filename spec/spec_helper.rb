@@ -2,8 +2,8 @@
 
 require 'simplecov'
 SimpleCov.start do
-  add_filter '/spec/'
-  add_filter '/vendor/'
+  skip '/spec/'
+  skip '/vendor/'
   minimum_coverage 100
 end
 
