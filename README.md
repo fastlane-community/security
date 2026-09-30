@@ -39,6 +39,7 @@ Security::InternetPassword.delete(server: "example.com", keychain: keychain)
 ```ruby
 Security::Certificate.import("/path/to/identity.p12", keychain: keychain, password: "p12 password")
 Security::Certificate.find(name: "Developer ID Installer", keychain: keychain).map(&:sha1)
+Security::Identity.find(keychain: keychain).map(&:name) #=> ["Apple Development: Jane Appleseed (TEAMID)"]
 ```
 
 ## Errors
@@ -62,9 +63,10 @@ rescue Security::Error => e
 end
 ```
 
-`Keychain.list`, `Keychain.default_keychain`, `Keychain.login_keychain` and
-`Certificate.find` raise `Security::Error` on failure in the same way.
-`Certificate.find` returns an empty array when nothing matched.
+`Keychain.list`, `Keychain.default_keychain`, `Keychain.login_keychain`,
+`Certificate.find` and `Identity.find` raise `Security::Error` on failure in the
+same way. `Certificate.find` and `Identity.find` return an empty array when
+nothing matched.
 
 The methods that change the keychain — `add`, `delete`, and the `Keychain`
 instance methods — return `true` or `false` and print what the tool reported,
