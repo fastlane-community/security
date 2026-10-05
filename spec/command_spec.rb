@@ -116,6 +116,15 @@ describe Security::Command do
     end
   end
 
+  describe '.run without stdin' do
+    it 'should call Open3 without stdin_data, as before passwords went to security -i' do
+      expect(Open3).to receive(:capture3).with(%w[security security], 'list-keychains', '-d', 'user')
+                                         .and_return(['', '', Security::Command.run('true').status])
+
+      expect(Security::Command.run('security', 'list-keychains', '-d', 'user').success?).to be true
+    end
+  end
+
   describe '.run_interactive' do
     let(:status) { Security::Command.run('true').status }
 

@@ -42,7 +42,9 @@ module Security
     def run(program, *, stdin: nil)
       # [program, program] rather than program: Ruby hands a lone string with
       # shell metacharacters to a shell.
-      Result.new(*Open3.capture3([program, program], *, stdin_data: stdin.to_s))
+      # stdin_data only when there is some, so a command without a password is
+      # run, and can be stubbed, exactly as before.
+      Result.new(*Open3.capture3([program, program], *, **(stdin ? { stdin_data: stdin } : {})))
     rescue Errno::ENOENT => e
       # Nothing ran, but the child Ruby forked exited 127 before exec, which is
       # what a shell reports for a missing command, and what this library
