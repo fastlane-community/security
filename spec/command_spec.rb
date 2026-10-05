@@ -92,4 +92,65 @@ describe Security::Command do
       expect { Security::Command.relay('true') }.not_to output.to_stderr
     end
   end
+
+  describe '.interactive_input' do
+    it 'should double quote every argument, escaping backslashes and double quotes' do
+      expect(Security::Command.interactive_input('add-generic-password', '-w', %(it's "a\\b"), '/a b.keychain'))
+        .to be == %("add-generic-password" "-w" "it's \\"a\\\\b\\"" "/a b.keychain"\n)
+    end
+
+    it 'should reject a line break, which would end the command' do
+      expect { Security::Command.interactive_input('unlock-keychain', '-p', "a\nb") }
+        .to raise_error(ArgumentError, /line break/)
+      expect { Security::Command.interactive_input('unlock-keychain', '-p', "a\rb") }
+        .to raise_error(ArgumentError, /line break/)
+    end
+
+    it 'should reject more arguments than security -i reads' do
+      expect { Security::Command.interactive_input(*Array.new(33, 'x')) }.to raise_error(ArgumentError, /at most 32/)
+    end
+
+    it 'should reject a line longer than security -i reads' do
+      expect { Security::Command.interactive_input('unlock-keychain', '-p', 'x' * 4096) }
+        .to raise_error(ArgumentError, /shorter than 4096/)
+    end
+  end
+
+  describe '.run without stdin' do
+    it 'should call Open3 without stdin_data, as before passwords went to security -i' do
+      expect(Open3).to receive(:capture3).with(%w[security security], 'list-keychains', '-d', 'user')
+                                         .and_return(['', '', Security::Command.run('true').status])
+
+      expect(Security::Command.run('security', 'list-keychains', '-d', 'user').success?).to be true
+    end
+  end
+
+  describe '.run_interactive' do
+    let(:status) { Security::Command.run('true').status }
+
+    it 'should pass the command on stdin, leaving only -i in the arguments' do
+      expect(Open3).to receive(:capture3)
+        .with(%w[security security], '-i', stdin_data: %("unlock-keychain" "-p" "secret"\n))
+        .and_return(['', '', status])
+
+      expect(Security::Command.run_interactive('unlock-keychain', '-p', 'secret').success?).to be true
+    end
+
+    it 'should drop the status line -i adds after an error' do
+      allow(Open3).to receive(:capture3)
+        .and_return(['', "security: SecKeychainUnlock: wrong\nunlock-keychain: returned 51\n", status])
+
+      expect(Security::Command.run_interactive('unlock-keychain', '-p', 'nope').stderr)
+        .to be == "security: SecKeychainUnlock: wrong\n"
+    end
+  end
+
+  describe '.relay_interactive' do
+    it 'should relay the error without the status line -i adds' do
+      allow(Open3).to receive(:capture3)
+        .and_return(['', "boom\nlock-keychain: returned 1\n", Security::Command.run('false').status])
+
+      expect { Security::Command.relay_interactive('lock-keychain') }.to output("boom\n").to_stderr
+    end
+  end
 end
