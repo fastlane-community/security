@@ -97,10 +97,11 @@ describe Certificate do
       Certificate.import('c.p12', keychain: Keychain.new('/tmp/a.keychain'))
     end
 
-    it 'should pass the file password and format when given' do
-      expect(Security::Command).to receive(:run)
-        .with('security', 'import', 'c.p12', '-k', 'k', '-P', 'secret', '-f', 'pkcs12', any_args)
-        .and_return(succeeded)
+    it 'should pass the file password through security -i, never as an argument' do
+      expect(Open3).to receive(:capture3)
+        .with(%w[security security], '-i',
+              stdin_data: start_with(%("import" "c.p12" "-k" "k" "-P" "secret" "-f" "pkcs12" )))
+        .and_return(['', '', succeeded.status])
 
       Certificate.import('c.p12', keychain: 'k', password: 'secret', format: 'pkcs12')
     end
@@ -133,6 +134,26 @@ describe Certificate do
 
           expect { Certificate.import(cert, keychain: keychain) }
             .to raise_error(Security::DuplicateItemError, /already exists/)
+        end
+      end
+    end
+
+    it 'should import an identity with its passphrase given through security -i' do
+      passphrase = %(p12 "pass" 'word' \\ $HOME)
+      RealSecurity.with_identity(passphrase) do |identity|
+        RealSecurity.with_keychain do |keychain|
+          expect(Certificate.import(identity, keychain: keychain, password: passphrase)).to be true
+
+          expect(RealSecurity.certificates_in(keychain)).to include('security gem spec')
+        end
+      end
+    end
+
+    it 'should raise for a wrong passphrase without the status line security -i adds' do
+      RealSecurity.with_identity('p12') do |identity|
+        RealSecurity.with_keychain do |keychain|
+          expect { Certificate.import(identity, keychain: keychain, password: 'nope') }
+            .to raise_error(Security::Error) { |error| expect(error.message).not_to include('returned') }
         end
       end
     end

@@ -30,8 +30,9 @@ describe Keychain do
 
   describe '#unlock' do
     it 'should unlock keychains with the given password' do
-      expect(Security::Command).to receive(:relay)
-        .with('security', 'unlock-keychain', '-p', 'p4ssw0rd').and_return(succeeded)
+      expect(Open3).to receive(:capture3)
+        .with(%w[security security], '-i', stdin_data: %("unlock-keychain" "-p" "p4ssw0rd"\n))
+        .and_return(['', '', succeeded.status])
       Keychain.unlock('p4ssw0rd')
     end
   end
@@ -57,8 +58,9 @@ describe Keychain do
 
     describe '#unlock' do
       it 'should unlock the keychain with the given password' do
-        expect(Security::Command).to receive(:relay)
-          .with('security', 'unlock-keychain', '-p', 'p4ssw0rd', 'test.keychain-db').and_return(succeeded)
+        expect(Open3).to receive(:capture3)
+          .with(%w[security security], '-i', stdin_data: %("unlock-keychain" "-p" "p4ssw0rd" "test.keychain-db"\n))
+          .and_return(['', '', succeeded.status])
         subject.unlock('p4ssw0rd')
       end
     end
@@ -92,9 +94,9 @@ describe Keychain do
     subject { Keychain.new('a b.keychain-db') }
 
     it 'should allow the signing tools by default' do
-      expect(Security::Command).to receive(:run)
-        .with('security', 'set-key-partition-list', '-S', 'apple-tool:,apple:,codesign:', '-s',
-              '-k', 'p4ss word', 'a b.keychain-db').and_return(succeeded)
+      input = %("set-key-partition-list" "-S" "apple-tool:,apple:,codesign:" "-s" "-k" "p4ss word" "a b.keychain-db"\n)
+      expect(Open3).to receive(:capture3)
+        .with(%w[security security], '-i', stdin_data: input).and_return(['', '', succeeded.status])
       expect(subject.set_key_partition_list('p4ss word')).to be true
     end
 
@@ -116,6 +118,29 @@ describe Keychain do
           Certificate.import(identity, keychain: path, password: 'p12')
 
           expect(Keychain.new(path).set_key_partition_list('')).to be true
+        end
+      end
+    end
+  end
+
+  describe 'a keychain password against the real tool, given through security -i' do
+    let(:password) { %(kc "pass" 'word' \\ $HOME) }
+
+    it 'should create, unlock and set the partition list with that password and no other' do
+      Dir.mktmpdir do |dir|
+        keychain = Keychain.create(File.join(dir, 'with password.keychain'), password)
+        begin
+          expect(keychain.lock).to be true
+          expect { expect(keychain.unlock('wrong')).to be false }
+            .to output(/passphrase you entered is not correct\.\n\z/).to_stderr
+          expect(keychain.unlock(password)).to be true
+
+          RealSecurity.with_identity('p12') do |identity|
+            Certificate.import(identity, keychain: keychain, password: 'p12')
+            expect(keychain.set_key_partition_list(password)).to be true
+          end
+        ensure
+          keychain.delete
         end
       end
     end

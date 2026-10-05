@@ -86,7 +86,7 @@ module Security
         options[:s] = service
         options[:w] = password
 
-        Command.relay('security', 'add-generic-password', *flags_for_options(options)).success?
+        Command.relay_interactive('add-generic-password', *flags_for_options(options)).success?
       end
 
       def find(options)
@@ -113,7 +113,7 @@ module Security
         options[:a] = account
         options[:s] = server
         options[:w] = password
-        Command.relay('security', 'add-internet-password', *flags_for_options(options)).success?
+        Command.relay_interactive('add-internet-password', *flags_for_options(options)).success?
       end
 
       def find(options)
