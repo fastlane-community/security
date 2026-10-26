@@ -66,7 +66,7 @@ module Security
         command += ['-f', format.to_s] if format
         trusted_applications.each { |application| command += ['-T', application] }
 
-        result = Command.run(*command)
+        result = password ? Command.run_interactive(*command.drop(1)) : Command.run(*command)
         return true if result.success?
 
         # Every failure exits 1, so only the message tells a duplicate apart.

@@ -24,7 +24,7 @@ module Security
     end
 
     def unlock(password)
-      Command.relay('security', 'unlock-keychain', '-p', password.to_s, @filename).success?
+      Command.relay_interactive('unlock-keychain', '-p', password.to_s, @filename).success?
     end
 
     def delete
@@ -44,8 +44,8 @@ module Security
     # Raises rather than returning false: a wrong keychain password is the usual
     # failure, and the caller needs the output to tell it from the others.
     def set_key_partition_list(password, partition_ids: DEFAULT_PARTITION_IDS)
-      result = Command.run('security', 'set-key-partition-list', '-S', partition_ids.join(','), '-s',
-                           '-k', password.to_s, @filename)
+      result = Command.run_interactive('set-key-partition-list', '-S', partition_ids.join(','), '-s',
+                                       '-k', password.to_s, @filename)
       raise Error.new(result.exitstatus, result.stderr) unless result.success?
 
       true
@@ -54,7 +54,7 @@ module Security
     class << self
       # Raises on failure, like the other class methods that answer with a keychain.
       def create(filename, password)
-        result = Command.run('security', 'create-keychain', '-p', password.to_s, filename.to_s)
+        result = Command.run_interactive('create-keychain', '-p', password.to_s, filename.to_s)
         raise Error.new(result.exitstatus, result.stderr) unless result.success?
 
         new(filename.to_s)
@@ -74,7 +74,7 @@ module Security
       end
 
       def unlock(password)
-        Command.relay('security', 'unlock-keychain', '-p', password.to_s).success?
+        Command.relay_interactive('unlock-keychain', '-p', password.to_s).success?
       end
 
       def default_keychain
