@@ -129,9 +129,9 @@ describe 'a non-default keychain' do
   let(:password) { 'p4ssw0rd!' }
 
   around(:example) do |example|
-    Security::Command.run("security create-keychain -p spec-password #{filename.shellescape}")
+    Security::Command.run('security', 'create-keychain', '-p', 'spec-password', filename)
     example.run
-    Security::Command.run("security delete-keychain #{filename.shellescape}")
+    Security::Command.run('security', 'delete-keychain', filename)
   end
 
   describe '#add' do
@@ -141,6 +141,13 @@ describe 'a non-default keychain' do
       entry = GenericPassword.find(service: service, keychain: filename)
       expect(entry.keychain.filename).to be == filename
       expect(entry.password).to be == password
+    end
+
+    it 'should store a password containing shell syntax as given' do
+      tricky = %q(it's $HOME && `true` ; "quoted")
+      expect(GenericPassword.add(service, account, tricky, keychain: filename)).to be true
+
+      expect(GenericPassword.find(service: service, keychain: filename).password).to be == tricky
     end
 
     it 'should not add the password to the default keychain' do

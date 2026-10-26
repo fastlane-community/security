@@ -25,7 +25,7 @@ describe Keychain do
   describe '#lock' do
     it 'should lock all keychains' do
       expect(Security::Command).to receive(:relay)
-        .with('security lock-keychain -a').and_return(succeeded)
+        .with('security', 'lock-keychain', '-a').and_return(succeeded)
       Keychain.lock
     end
   end
@@ -33,7 +33,7 @@ describe Keychain do
   describe '#unlock' do
     it 'should unlock keychains with the given password' do
       expect(Security::Command).to receive(:relay)
-        .with('security unlock-keychain -p p4ssw0rd').and_return(succeeded)
+        .with('security', 'unlock-keychain', '-p', 'p4ssw0rd').and_return(succeeded)
       Keychain.unlock('p4ssw0rd')
     end
   end
@@ -44,7 +44,7 @@ describe Keychain do
     describe '#info' do
       it 'should show keychain info' do
         expect(Security::Command).to receive(:relay)
-          .with('security show-keychain-info test.keychain-db').and_return(succeeded)
+          .with('security', 'show-keychain-info', 'test.keychain-db').and_return(succeeded)
         subject.info
       end
     end
@@ -52,7 +52,7 @@ describe Keychain do
     describe '#lock' do
       it 'should lock the keychain' do
         expect(Security::Command).to receive(:relay)
-          .with('security lock-keychain test.keychain-db').and_return(succeeded)
+          .with('security', 'lock-keychain', 'test.keychain-db').and_return(succeeded)
         subject.lock
       end
     end
@@ -60,7 +60,7 @@ describe Keychain do
     describe '#unlock' do
       it 'should unlock the keychain with the given password' do
         expect(Security::Command).to receive(:relay)
-          .with('security unlock-keychain -p p4ssw0rd test.keychain-db').and_return(succeeded)
+          .with('security', 'unlock-keychain', '-p', 'p4ssw0rd', 'test.keychain-db').and_return(succeeded)
         subject.unlock('p4ssw0rd')
       end
     end
@@ -68,7 +68,7 @@ describe Keychain do
     describe '#delete' do
       it 'should delete the keychain' do
         expect(Security::Command).to receive(:relay)
-          .with('security delete-keychain test.keychain-db').and_return(succeeded)
+          .with('security', 'delete-keychain', 'test.keychain-db').and_return(succeeded)
         subject.delete
       end
     end
