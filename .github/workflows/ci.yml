@@ -39,8 +39,6 @@ jobs:
           # telling anyone and records nothing about what it tested.
           - os: 'macos-15'
             ruby-version: '3.4'
-          - os: 'macos-14'
-            ruby-version: '3.4'
           # Intel, in case anything here turns out to be architecture
           # dependent. The arm64 runners above are all Apple silicon.
           - os: 'macos-15-intel'
