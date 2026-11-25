@@ -22,12 +22,13 @@ module RealSecurity
 
   def with_keychain
     Dir.mktmpdir do |dir|
-      path = File.join(dir, 'spec.keychain')
-      Security::Command.run('security', 'create-keychain', '-p', '', path)
+      # Use the same absolute database path that security reports for stored items.
+      path = File.join(File.realpath(dir), 'spec.keychain-db')
+      run('security', 'create-keychain', '-p', '', path)
       begin
         yield path
       ensure
-        Security::Command.run('security', 'delete-keychain', path)
+        run('security', 'delete-keychain', path)
       end
     end
   end

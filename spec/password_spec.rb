@@ -1,183 +1,134 @@
 # frozen_string_literal: true
 
-require 'tmpdir'
-
 describe GenericPassword do
-  let(:keychain) { Keychain.login_keychain } # FIXME: we should create a temporary keychain for tests
+  let(:service) { 'com.example.service' }
+  let(:account) { 'jappleseed' }
+  let(:password) { 'p4ssw0rd!' }
+  let(:comment) { 'Some comment' }
 
   describe '#add' do
-    let(:service) { 'com.example.service' }
-    let(:account) { 'jappleseed' }
-    let(:password) { 'p4ssw0rd!' }
-    let(:comment) { 'Some comment' }
+    it 'should add the password and attributes to the given keychain' do
+      RealSecurity.with_keychain do |filename|
+        expect(GenericPassword.add(service, account, password, comment: comment, keychain: filename)).to be true
 
-    around(:example) do |example|
-      GenericPassword.add(service, account, password, comment: comment)
-      example.run
-      GenericPassword.delete({ service: service, account: account })
+        entry = GenericPassword.find(account: account, keychain: filename)
+        expect(entry.keychain.filename).to be == filename
+        expect(entry.attributes).to include('acct' => account, 'svce' => service, 'icmt' => comment)
+        expect(entry.password).to be == password
+      end
     end
 
-    it 'should be added to the keychain' do
-      entry = GenericPassword.find({ account: account })
-      expect(entry.keychain.filename).to be == keychain.filename
-      expect(entry.attributes).to include({
-                                            'acct' => account,
-                                            'svce' => service,
-                                            'icmt' => comment
-                                          })
-      expect(entry.password).to be == password
+    it 'should store a password containing shell syntax as given' do
+      RealSecurity.with_keychain do |filename|
+        tricky = %q(it's $HOME && `true` ; "quoted")
+        expect(GenericPassword.add(service, account, tricky, keychain: filename)).to be true
+
+        expect(GenericPassword.find(service: service, keychain: filename).password).to be == tricky
+      end
+    end
+
+    it 'should accept a Keychain object' do
+      RealSecurity.with_keychain do |filename|
+        keychain = Keychain.new(filename)
+        expect(GenericPassword.add(service, account, password, keychain: keychain)).to be true
+
+        entry = GenericPassword.find(service: service, keychain: keychain)
+        expect(entry.keychain.filename).to be == filename
+        expect(entry.password).to be == password
+      end
     end
   end
 
   describe '#find' do
-    describe 'when no matching item exists' do
-      it 'should return nil' do
-        expect(GenericPassword.find(service: 'com.example.no-such-service')).to be_nil
+    it 'should return nil when the password is in another keychain' do
+      RealSecurity.with_keychain do |first|
+        expect(GenericPassword.add(service, account, password, keychain: first)).to be true
+
+        RealSecurity.with_keychain do |second|
+          expect(GenericPassword.find(service: service, keychain: second)).to be_nil
+        end
       end
     end
 
-    describe 'when the security command fails' do
-      it 'should raise an error carrying the status and the output' do
-        expect { GenericPassword.find(Z: 'bogus') }.to raise_error(Security::Error) do |error|
+    it 'should raise an error carrying the status and the output when the security command fails' do
+      RealSecurity.with_keychain do |filename|
+        expect { GenericPassword.find(Z: 'bogus', keychain: filename) }.to raise_error(Security::Error) do |error|
           expect(error.status).to be == 2
           expect(error.message).to match(/illegal option/)
         end
       end
     end
   end
+
+  describe '#delete' do
+    it 'should delete the password from the given keychain' do
+      RealSecurity.with_keychain do |filename|
+        expect(GenericPassword.add(service, account, password, keychain: filename)).to be true
+
+        expect(GenericPassword.delete(service: service, keychain: filename)).to be true
+        expect(GenericPassword.find(service: service, keychain: filename)).to be_nil
+      end
+    end
+  end
 end
 
 describe InternetPassword do
-  let(:keychain) { Keychain.login_keychain } # FIXME: we should create a temporary keychain for tests
+  let(:server) { 'example.com' }
+  let(:account) { 'jappleseed@example.com' }
 
   describe '#add' do
-    let(:server) { 'example.com' }
-    let(:account) { 'jappleseed@example.com' }
+    shared_examples 'an internet password' do
+      it 'should add the password and attributes to the given keychain' do
+        RealSecurity.with_keychain do |filename|
+          expect(InternetPassword.add(server, account, password, comment: comment, keychain: filename)).to be true
+
+          entry = InternetPassword.find(account: account, keychain: filename)
+          expect(entry.keychain.filename).to be == filename
+          expect(entry.attributes).to include('acct' => account, 'srvr' => server)
+          expect(entry.attributes['icmt']).to be == comment if comment
+          expect(entry.password).to be == password
+        end
+      end
+    end
 
     describe 'ascii password' do
       let(:password) { 'p4ssw0rd!' }
       let(:comment) { 'Some comment' }
 
-      around(:example) do |example|
-        InternetPassword.add(server, account, password, comment: comment)
-        example.run
-        InternetPassword.delete({ server: server, account: account })
-      end
-
-      it 'should be added to the keychain' do
-        entry = InternetPassword.find({ account: account })
-        expect(entry.keychain.filename).to be == keychain.filename
-        expect(entry.attributes).to include({
-                                              'acct' => account,
-                                              'srvr' => server,
-                                              'icmt' => comment
-                                            })
-        expect(entry.password).to be == password
-      end
+      include_examples 'an internet password'
     end
 
     describe 'ascii password with backslash' do
       let(:password) { 'p4ssw\0rd!' }
+      let(:comment) { nil }
 
-      around(:example) do |example|
-        InternetPassword.add(server, account, password)
-        example.run
-        InternetPassword.delete({ server: server, account: account })
-      end
-
-      it 'should be added to the keychain' do
-        entry = InternetPassword.find({ account: account })
-        expect(entry.keychain.filename).to be == keychain.filename
-        expect(entry.attributes).to include({
-                                              'acct' => account,
-                                              'srvr' => server
-                                            })
-        expect(entry.password).to be == password
-      end
+      include_examples 'an internet password'
     end
 
     describe 'non-ascii password' do
       let(:password) { '•••p4ssw0rd!••' }
       let(:comment) { '•••Some comment•••' }
 
-      around(:example) do |example|
-        InternetPassword.add(server, account, password, comment: comment)
-        example.run
-        InternetPassword.delete({ server: server, account: account })
-      end
-
-      it 'should be added to the keychain' do
-        entry = InternetPassword.find({ account: account })
-        expect(entry.keychain.filename).to be == keychain.filename
-        expect(entry.attributes).to include({
-                                              'acct' => account,
-                                              'srvr' => server,
-                                              'icmt' => comment
-                                            })
-        expect(entry.password).to be == password
-      end
-    end
-  end
-end
-
-describe 'a non-default keychain' do
-  # `security` reports the resolved path, and Dir.tmpdir is a symlink on macOS
-  let(:filename) { File.join(File.realpath(Dir.tmpdir), 'security-spec.keychain-db') }
-  let(:keychain) { Keychain.new(filename) }
-  let(:service) { 'com.example.service' }
-  let(:account) { 'jappleseed' }
-  let(:password) { 'p4ssw0rd!' }
-
-  around(:example) do |example|
-    Security::Command.run('security', 'create-keychain', '-p', 'spec-password', filename)
-    example.run
-    Security::Command.run('security', 'delete-keychain', filename)
-  end
-
-  describe '#add' do
-    it 'should add the password to the given keychain' do
-      expect(GenericPassword.add(service, account, password, keychain: filename)).to be true
-
-      entry = GenericPassword.find(service: service, keychain: filename)
-      expect(entry.keychain.filename).to be == filename
-      expect(entry.password).to be == password
-    end
-
-    it 'should store a password containing shell syntax as given' do
-      tricky = %q(it's $HOME && `true` ; "quoted")
-      expect(GenericPassword.add(service, account, tricky, keychain: filename)).to be true
-
-      expect(GenericPassword.find(service: service, keychain: filename).password).to be == tricky
-    end
-
-    it 'should not add the password to the default keychain' do
-      GenericPassword.add(service, account, password, keychain: filename)
-
-      expect(GenericPassword.find(service: service)).to be_nil
+      include_examples 'an internet password'
     end
   end
 
   describe '#delete' do
     it 'should delete the password from the given keychain' do
-      GenericPassword.add(service, account, password, keychain: filename)
+      RealSecurity.with_keychain do |filename|
+        expect(InternetPassword.add(server, account, 'p4ssw0rd!', keychain: filename)).to be true
 
-      expect(GenericPassword.delete(service: service, keychain: filename)).to be true
-      expect(GenericPassword.find(service: service, keychain: filename)).to be_nil
-    end
-  end
-
-  describe 'when given a Keychain' do
-    it 'should act on the keychain it names' do
-      GenericPassword.add(service, account, password, keychain: keychain)
-
-      entry = GenericPassword.find(service: service, keychain: keychain)
-      expect(entry.keychain.filename).to be == filename
-      expect(entry.password).to be == password
+        expect(InternetPassword.delete(server: server, account: account, keychain: filename)).to be true
+        expect(InternetPassword.find(account: account, keychain: filename)).to be_nil
+      end
     end
   end
 end
 
 describe 'when `security` is not available' do
+  let(:filename) { '/nonexistent/spec.keychain-db' }
+  let(:service) { 'com.example.service' }
+
   # Every platform other than macOS. The tool used to be reached through a
   # shell, which reported a missing command as status 127; callers depend on
   # seeing a failure rather than an exception escaping the library.
@@ -193,7 +144,7 @@ describe 'when `security` is not available' do
 
   describe '#find' do
     it 'should raise a Security::Error carrying the status' do
-      expect { GenericPassword.find(service: 'com.example.service') }.to raise_error(Security::Error) do |error|
+      expect { GenericPassword.find(service: service, keychain: filename) }.to raise_error(Security::Error) do |error|
         expect(error.status).to be == 127
         expect(error.message).to match(/No such file or directory/)
       end
@@ -203,14 +154,14 @@ describe 'when `security` is not available' do
   describe '#add' do
     it 'should report failure rather than raising, relaying what went wrong' do
       expect do
-        expect(GenericPassword.add('com.example.service', 'jappleseed', 'p4ssw0rd')).to be false
+        expect(GenericPassword.add(service, 'jappleseed', 'p4ssw0rd', keychain: filename)).to be false
       end.to output(/No such file or directory/).to_stderr
     end
   end
 
   describe '#delete' do
     it 'should report failure rather than raising' do
-      expect(GenericPassword.delete(service: 'com.example.service')).to be false
+      expect(GenericPassword.delete(service: service, keychain: filename)).to be false
     end
   end
 end
